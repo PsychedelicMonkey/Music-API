@@ -17,3 +17,24 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+class Artist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    bio = db.Column(db.Text)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    albums = db.relationship('Album', backref='artist', lazy='dynamic')
+
+    def __repr__(self):
+        return f'<Artist: {self.name}>'
+
+class Album(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'))
+    released = db.Column(db.DateTime)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Album: {self.name}, Artist: {self.artist.name}>'

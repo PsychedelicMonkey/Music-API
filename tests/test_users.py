@@ -21,3 +21,12 @@ class UserModelTest(unittest.TestCase):
 
         self.assertTrue(u.check_password('correct'))
         self.assertFalse(u.check_password('incorrect'))
+
+    def test_password_salt(self):
+        u1 = User(username='bob', email='bob@test.com')
+        u1.set_password('correct')
+
+        u2 = User(username='jane', email='jane@test.com')
+        u2.set_password('correct')
+
+        self.assertTrue(u1.password != u2.password)

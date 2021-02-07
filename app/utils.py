@@ -1,9 +1,11 @@
 from flask import jsonify, request, url_for, current_app
+import string
 
 def paginate_query(query, schema, endpoint, **kwargs):
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', current_app.config['ITEMS_PER_PAGE'], type=int), current_app.config['MAX_ITEMS_PER_PAGE'])
-    resources = query.paginate(page, per_page, False)
+    order_by = request.args.get('order_by', 'id', type=str)
+    resources = query.order_by(order_by).paginate(page, per_page, False)
     return jsonify({
         'items': schema.dump(resources.items),
         '_meta': {
@@ -11,6 +13,7 @@ def paginate_query(query, schema, endpoint, **kwargs):
             'per_page': per_page,
             'total_pages': resources.pages,
             'total_items': resources.total,
+            'order_by': order_by,
         },
         '_links': {
             'self': url_for(endpoint, page=page, per_page=per_page, **kwargs),
