@@ -2,12 +2,13 @@ from flask import jsonify, request, url_for
 from app import db
 from app.errors import bad_request
 from app.models import User
-from app.schemas import UserSchema
+from app.schemas import UserSchema, ArtistSchema
 from app.utils import paginate_query
 from app.user import user
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+artists_schema = ArtistSchema(many=True)
 
 @user.route('/users', methods=['GET'])
 def get_users():
@@ -17,6 +18,11 @@ def get_users():
 def get_user(id):
     user = User.query.get_or_404(id)
     return jsonify(user_schema.dump(user))
+
+@user.route('/users/<int:id>/followed', methods=['GET'])
+def get_followed(id):
+    user = User.query.get_or_404(id)
+    return paginate_query(user.followed, artists_schema, 'user.get_followed', id=id)
 
 @user.route('/users', methods=['POST'])
 def create_user():

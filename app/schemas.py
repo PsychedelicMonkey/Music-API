@@ -13,8 +13,11 @@ class UserSchema(ma.SQLAlchemySchema):
     password = ma.auto_field(load_only=True, required=False)
     created = ma.auto_field(dump_only=True)
 
+    followed_count = fields.Function(lambda obj: obj.followed.count())
+
     _links = ma.Hyperlinks({
         'self': ma.URLFor('user.get_user', values=dict(id="<id>")),
+        'followed': ma.URLFor('user.get_followed', values=dict(id="<id>")),
     })
 
     @post_load
@@ -30,10 +33,12 @@ class ArtistSchema(ma.SQLAlchemyAutoSchema):
         model = Artist
 
     albums_count = fields.Function(lambda obj: obj.albums.count())
+    followers_count = fields.Function(lambda obj: obj.followers.count())
 
     _links = ma.Hyperlinks({
         'self': ma.URLFor('main.get_artist', values=dict(id="<id>")),
         'albums': ma.URLFor('main.get_artist_albums', values=dict(id="<id>")),
+        'followers': ma.URLFor('main.get_followers', values=dict(id="<id>")),
     })
 
 class AlbumSchema(ma.SQLAlchemyAutoSchema):

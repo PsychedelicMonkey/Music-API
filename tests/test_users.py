@@ -1,6 +1,6 @@
 import unittest
 from app import create_app, db
-from app.models import User
+from app.models import User, Artist
 from config import TestConfig
 
 class UserModelTest(unittest.TestCase):
@@ -30,3 +30,31 @@ class UserModelTest(unittest.TestCase):
         u2.set_password('correct')
 
         self.assertTrue(u1.password != u2.password)
+
+    def test_followed(self):
+        u = User(username='bob', email='bob@test.com')
+        u.set_password('123')
+        a = Artist(name='The Beatles')
+        db.session.add_all([u, a])
+        db.session.commit()
+
+        self.assertEqual(u.followed.all(), [])
+        self.assertEqual(a.followers.all(), [])
+
+        u.follow(a)
+        db.session.commit()
+
+        self.assertTrue(u.is_following(a))
+        self.assertEqual(u.followed.first().name, 'The Beatles')
+        self.assertEqual(u.followed.count(), 1)
+        self.assertEqual(a.followers.first().username, 'bob')
+        self.assertEqual(a.followers.count(), 1)
+
+        u.unfollow(a)
+        db.session.commit()
+
+        self.assertFalse(u.is_following(a))
+        self.assertEqual(u.followed.all(), [])
+        self.assertEqual(u.followed.count(), 0)
+        self.assertEqual(a.followers.all(), [])
+        self.assertEqual(a.followers.count(), 0)

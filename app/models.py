@@ -2,12 +2,20 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 
+followers = db.Table('followers',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('artist_id', db.Integer, db.ForeignKey('artist.id'))
+)
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password = db.Column(db.String(128), nullable=False)
     created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    followed = db.relationship('Artist', secondary=followers, lazy='dynamic',
+        backref=db.backref('followers', lazy='dynamic'))
 
     def __repr__(self):
         return f'<User: {self.username}>'
@@ -17,6 +25,17 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+    def follow(self, artist):
+        if not self.is_following(artist):
+            self.followed.append(artist)
+
+    def unfollow(self, artist):
+        if self.is_following(artist):
+            self.followed.remove(artist)
+
+    def is_following(self, artist):
+        return self.followed.filter(followers.c.artist_id == artist.id).count() > 0
 
 class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
