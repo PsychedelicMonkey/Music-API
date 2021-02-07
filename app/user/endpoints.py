@@ -3,6 +3,7 @@ from app import db
 from app.errors import bad_request
 from app.models import User
 from app.schemas import UserSchema
+from app.utils import paginate_query
 from app.user import user
 
 user_schema = UserSchema()
@@ -10,7 +11,7 @@ users_schema = UserSchema(many=True)
 
 @user.route('/users', methods=['GET'])
 def get_users():
-    return jsonify(users_schema.dump(User.query.all()))
+    return paginate_query(User.query, users_schema, 'user.get_users')
 
 @user.route('/users/<int:id>', methods=['GET'])
 def get_user(id):

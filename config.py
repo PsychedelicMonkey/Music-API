@@ -8,6 +8,8 @@ class Config():
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'create-a-secret-key'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    ITEMS_PER_PAGE = 10
+    MAX_ITEMS_PER_PAGE = 30
 
 class TestConfig(Config):
     TESTING = True
