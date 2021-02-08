@@ -11,6 +11,8 @@ class Config():
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ITEMS_PER_PAGE = 10
     MAX_ITEMS_PER_PAGE = 30
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(basedir, 'uploads')
+    ALLOWED_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg']
 
 class TestConfig(Config):
     TESTING = True
