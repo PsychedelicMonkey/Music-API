@@ -6,6 +6,12 @@ from app.main import main
 def wants_json_response():
     return request.accept_mimetypes['application/json'] >= request.accept_mimetypes['text/html']
 
+@main.app_errorhandler(403)
+def forbidden(e):
+    if wants_json_response():
+        return error_response(403, 'You do not have permission to access this resource')
+    return '403', 403
+
 @main.app_errorhandler(404)
 def page_not_found(e):
     if wants_json_response():

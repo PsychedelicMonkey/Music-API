@@ -1,4 +1,5 @@
-from flask import jsonify, request, url_for
+from flask import jsonify, request, url_for, abort
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.errors import bad_request
 from app.models import User
@@ -11,15 +12,18 @@ users_schema = UserSchema(many=True)
 artists_schema = ArtistSchema(many=True)
 
 @user.route('/users', methods=['GET'])
+@jwt_required
 def get_users():
     return paginate_query(User.query, users_schema, 'user.get_users')
 
 @user.route('/users/<int:id>', methods=['GET'])
+@jwt_required
 def get_user(id):
     user = User.query.get_or_404(id)
     return jsonify(user_schema.dump(user))
 
 @user.route('/users/<int:id>/followed', methods=['GET'])
+@jwt_required
 def get_followed(id):
     user = User.query.get_or_404(id)
     return paginate_query(user.followed, artists_schema, 'user.get_followed', id=id)
@@ -42,7 +46,10 @@ def create_user():
     return response
 
 @user.route('/users/<int:id>', methods=['PUT'])
+@jwt_required
 def update_user(id):
+    if get_jwt_identity() != id:
+        abort(403)
     user = User.query.get_or_404(id)
     data = request.get_json() or {}
     if 'username' in data and data['username'] != user.username and User.query.filter_by(username=data['username']).first():

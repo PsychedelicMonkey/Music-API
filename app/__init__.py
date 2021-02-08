@@ -3,11 +3,13 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
+from flask_jwt_extended import JWTManager
 from config import Config
 
 db = SQLAlchemy()
 migrate = Migrate()
 ma = Marshmallow()
+jwt = JWTManager()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -18,6 +20,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     ma.init_app(app)
+    jwt.init_app(app)
 
     from app.main import main
     app.register_blueprint(main, url_prefix='/api')
