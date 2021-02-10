@@ -55,5 +55,19 @@ class Album(db.Model):
     released = db.Column(db.DateTime)
     created = db.Column(db.DateTime, default=datetime.utcnow)
 
+    tracks = db.relationship('Track', backref='album', lazy='dynamic')
+
     def __repr__(self):
         return f'<Album: {self.name}, Artist: {self.artist.name}>'
+
+class Track(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    track_no = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
+    runtime = db.Column(db.DateTime)
+    released = db.Column(db.DateTime)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Track: {self.name}, Album: {self.album.name}>'

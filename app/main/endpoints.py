@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models import Artist, Album
-from app.schemas import ArtistSchema, AlbumSchema, UserSchema
+from app.models import Artist, Album, Track
+from app.schemas import ArtistSchema, AlbumSchema, UserSchema, TrackSchema, AlbumTrackSchema
 from app.utils import paginate_query
 from app.main import main
 
@@ -10,6 +10,8 @@ artist_schema = ArtistSchema()
 artists_schema = ArtistSchema(many=True)
 album_schema = AlbumSchema()
 albums_schema = AlbumSchema(many=True)
+track_schema = TrackSchema()
+tracks_schema = TrackSchema(many=True)
 
 @main.route('/artists', methods=['GET'])
 @jwt_required
@@ -26,7 +28,8 @@ def get_artist(id):
 @jwt_required
 def get_artist_albums(id):
     artist = Artist.query.get_or_404(id)
-    return paginate_query(artist.albums, albums_schema, 'main.get_artist_albums', id=id)
+    schema = AlbumTrackSchema(many=True)
+    return paginate_query(artist.albums, schema, 'main.get_artist_albums', id=id)
 
 @main.route('/artists/<int:id>/followers', methods=['GET'])
 @jwt_required
@@ -44,3 +47,20 @@ def get_albums():
 def get_album(id):
     album = Album.query.get_or_404(id)
     return jsonify(album_schema.dump(album))
+
+@main.route('/albums/<int:id>/tracks', methods=['GET'])
+@jwt_required
+def get_album_tracks(id):
+    album = Album.query.get_or_404(id)
+    return jsonify(tracks_schema.dump(album.tracks))
+
+@main.route('/tracks', methods=['GET'])
+@jwt_required
+def get_all_tracks():
+    return paginate_query(Track.query, tracks_schema, 'main.get_all_tracks')
+
+@main.route('/tracks/<int:id>', methods=['GET'])
+@jwt_required
+def get_track(id):
+    track = Track.query.get_or_404(id)
+    return jsonify(track_schema.dump(track))

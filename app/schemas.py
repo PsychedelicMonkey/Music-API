@@ -1,6 +1,6 @@
 from marshmallow import post_load, fields
 from app import ma
-from app.models import User, Artist, Album
+from app.models import User, Artist, Album, Track
 
 class UserSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -28,6 +28,28 @@ class UserSchema(ma.SQLAlchemySchema):
             data['password'] = user.password
         return data
 
+class TrackSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Track
+
+    album = fields.Function(lambda obj: obj.album.name)
+
+class AlbumSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Album
+
+    track_count = fields.Function(lambda obj: obj.tracks.count())
+
+    _links = ma.Hyperlinks({
+        'self': ma.URLFor('main.get_album', values=dict(id="<id>")),
+    })
+
+class AlbumTrackSchema(AlbumSchema):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    tracks = fields.Nested(TrackSchema(only=('track_no', 'name',), many=True))
+
 class ArtistSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Artist
@@ -39,12 +61,4 @@ class ArtistSchema(ma.SQLAlchemyAutoSchema):
         'self': ma.URLFor('main.get_artist', values=dict(id="<id>")),
         'albums': ma.URLFor('main.get_artist_albums', values=dict(id="<id>")),
         'followers': ma.URLFor('main.get_followers', values=dict(id="<id>")),
-    })
-
-class AlbumSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Album
-
-    _links = ma.Hyperlinks({
-        'self': ma.URLFor('main.get_album', values=dict(id="<id>")),
     })
