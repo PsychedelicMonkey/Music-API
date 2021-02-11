@@ -43,7 +43,7 @@ class Artist(db.Model):
     bio = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    albums = db.relationship('Album', backref='artist', lazy='dynamic')
+    albums = db.relationship('Album', backref='artist', lazy='dynamic', cascade='all, delete')
 
     def __repr__(self):
         return f'<Artist: {self.name}>'
@@ -55,7 +55,7 @@ class Album(db.Model):
     released = db.Column(db.DateTime)
     created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    tracks = db.relationship('Track', backref='album', lazy='dynamic')
+    tracks = db.relationship('Track', backref='album', lazy='dynamic', cascade='all, delete')
 
     def __repr__(self):
         return f'<Album: {self.name}, Artist: {self.artist.name}>'

@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from app import db
 from app.models import Artist, Album, Track
 from app.schemas import ArtistSchema, AlbumSchema, UserSchema, TrackSchema, AlbumTrackSchema
 from app.utils import paginate_query
@@ -24,6 +25,14 @@ def get_artist(id):
     artist = Artist.query.get_or_404(id)
     return jsonify(artist_schema.dump(artist))
 
+@main.route('/artists/<int:id>', methods=['DELETE'])
+@jwt_required
+def delete_artist(id):
+    artist = Artist.query.get_or_404(id)
+    db.session.delete(artist)
+    db.session.commit()
+    return jsonify({'message': 'artist deleted'})
+
 @main.route('/artists/<int:id>/albums', methods=['GET'])
 @jwt_required
 def get_artist_albums(id):
@@ -47,6 +56,14 @@ def get_albums():
 def get_album(id):
     album = Album.query.get_or_404(id)
     return jsonify(album_schema.dump(album))
+
+@main.route('/albums/<int:id>', methods=['DELETE'])
+@jwt_required
+def delete_album(id):
+    album = Album.query.get_or_404(id)
+    db.session.delete(album)
+    db.session.commit()
+    return jsonify({'message': 'album deleted'})
 
 @main.route('/albums/<int:id>/tracks', methods=['GET'])
 @jwt_required
